@@ -134,7 +134,7 @@ export default function Home() {
           </div>
         </>
       )}
-      <div className="h-24"></div>
+      <div className="h-20"></div>
       <footer className="absolute bottom-0 self-center mb-4">
         <div className="text-center items-center justify-center flex flex-col">
           <Link
