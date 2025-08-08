@@ -13,11 +13,11 @@ import Link from 'next/link'
 import Image from 'next/image'
 import elvxk from './elvxk'
 
-
 export default function Home() {
   useEffect(() => {
     console.info(elvxk);
   }, []);
+
   const [emails, setEmails] = useState('')
   const [finalEmails, setFinalEmails] = useState([])
   const [uniqueEmails, setUniqueEmails] = useState([])
@@ -25,6 +25,11 @@ export default function Home() {
   const [finalCount, setFinalCount] = useState(0)
   const [totalDuplicates, setTotalDuplicates] = useState(0)
   const [totalDup, setTotalDup] = useState(0)
+
+  // Compare states
+  const [compareList, setCompareList] = useState('')
+  const [notRegistered, setNotRegistered] = useState([])
+  const [notListed, setNotListed] = useState([])
 
   const handleAnalyze = () => {
     const cleanedList = emails
@@ -60,6 +65,37 @@ export default function Home() {
     setFinalCount(finalList.length)
     setTotalDuplicates(totalDup)
     setTotalDup(totalDupCount)
+
+    // Reset compare state
+    setCompareList('')
+    setNotRegistered([])
+    setNotListed([])
+  }
+
+  const handleCompare = () => {
+    const cleanedCompare = compareList
+      .split('\n')
+      .map(email =>
+        email
+          .trim()
+          .toLowerCase()
+          .replace(/[\u200B-\u200D\uFEFF\r]/g, '') // hapus karakter tersembunyi
+      )
+      .filter(email => email !== '')
+
+    const cleanedFinal = finalEmails.map(email =>
+      email
+        .trim()
+        .toLowerCase()
+        .replace(/[\u200B-\u200D\uFEFF\r]/g, '')
+    )
+
+    const notFound = cleanedFinal.filter(email => !cleanedCompare.includes(email))
+    const notList = cleanedCompare.filter(email => !cleanedFinal.includes(email))
+
+
+    setNotRegistered(notFound)
+    setNotListed(notList)
   }
 
   return (
@@ -103,7 +139,6 @@ export default function Home() {
             </CardHeader>
           </Card>
 
-
           <div className='w-full flex flex-col lg:flex-row gap-4'>
             <Card className="w-full bg-secondary-background">
               <CardHeader>
@@ -130,7 +165,57 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
             </Card>
+          </div>
 
+          {/* Compare Section */}
+          <Card className="w-full bg-secondary-background mt-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Compare List</CardTitle>
+              <CardDescription>
+                <Textarea
+                  className="w-full h-40 p-3 mb-4"
+                  placeholder="Masukkan daftar email untuk compare"
+                  value={compareList}
+                  onChange={(e) => setCompareList(e.target.value)}
+                />
+                <Button
+                  className="hover:cursor-pointer w-full mb-4"
+                  onClick={handleCompare}>
+                  Cek Email yang Belum Terdaftar
+                </Button>
+              </CardDescription>
+            </CardHeader>
+          </Card>
+          <div className='w-full flex flex-col lg:flex-row gap-4'>
+            {notRegistered.length > 0 && (
+              <Card className="w-full bg-secondary-background mt-4">
+                <CardHeader>
+                  <CardTitle className="text-lg">Email yang Belum Terdaftar ({notRegistered.length})</CardTitle>
+                  <CardDescription>
+                    <ul className="list-disc list-inside text-sm">
+                      {notRegistered.map((email, index) => (
+                        <li key={index}>{email}</li>
+                      ))}
+                    </ul>
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            )}
+
+            {notListed.length > 0 && (
+              <Card className="w-full bg-secondary-background mt-4">
+                <CardHeader>
+                  <CardTitle className="text-lg">Email yang tidak ada dalam list awal ({notListed.length})</CardTitle>
+                  <CardDescription>
+                    <ul className="list-disc list-inside text-sm">
+                      {notListed.map((email, index) => (
+                        <li key={index}>{email}</li>
+                      ))}
+                    </ul>
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            )}
           </div>
         </>
       )}
@@ -162,4 +247,3 @@ export default function Home() {
     </div>
   )
 }
-
